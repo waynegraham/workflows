@@ -49,6 +49,7 @@ exclude:
   - gemfiles/
   - Gemfile
   - Gemfile.lock
+  - lib/
   - node_modules/
   - vendor/bundle/
   - vendor/cache/
