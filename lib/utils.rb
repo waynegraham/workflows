@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'chronic'
 require 'colorize'
 require 'rss'
@@ -5,7 +7,6 @@ require 'rss'
 require 'date'
 require 'erb'
 
-require 'rss'
 require 'rss/2.0'
 require 'open-uri'
 require 'fileutils'
@@ -22,25 +23,23 @@ module Utils
 
   def self.format_title(item)
     item.title.split(%r{ |!|\?|/|:|&|-|$|,|“|”|’}).map do |i|
-        i.downcase if i != ''
+      i.downcase if i != ''
     end.compact.join('-')
   end
 
   def self.clean_website(url)
-    url = "http://#{url}" unless url[/^https?:\/\//] || url.length == 0
+    url = "http://#{url}" unless url[%r{^https?://}] || url.empty?
     url
   end
 
   def self.write_file(path, contents)
-    begin
-      file = File.open(path, 'w')
-      file.write(contents)
-    rescue IOError => error
-      puts "File not writable. Check your permissions"
-      puts error.inpsect
-    ensure
-      file.close unless file == nil
-    end
+    file = File.open(path, 'w')
+    file.write(contents)
+  rescue IOError => e
+    puts 'File not writable. Check your permissions'
+    puts e.inpsect
+  ensure
+    file&.close
   end
 
   def self.header(item)
@@ -65,12 +64,12 @@ module Utils
 end
 
 module Rss
-    def self.import(feed_url)
-      URI.open(feed_url) do |rss|
-        feed = RSS::Parser.parse(rss)
-        feed.items.each do |item|
-          Utils.write_post(item)
-        end
+  def self.import(feed_url)
+    URI.open(feed_url) do |rss|
+      feed = RSS::Parser.parse(rss)
+      feed.items.each do |item|
+        Utils.write_post(item)
       end
     end
   end
+end
